@@ -13,6 +13,7 @@ export function setWorkspaceSearchParams(
     environment_id: string | null;
     request_id: string | null;
     folder_id: string | null;
+    flow_id: string | null;
   }>,
 ) {
   // oxlint-disable-next-line no-explicit-any
@@ -38,10 +39,10 @@ export function navigateToRequestOrFolderOrWorkspace(
   model: (Workspace | Folder | HttpRequest | GrpcRequest | WebsocketRequest)["model"],
 ) {
   if (model === "workspace") {
-    setWorkspaceSearchParams({ request_id: null, folder_id: null });
+    setWorkspaceSearchParams({ request_id: null, folder_id: null, flow_id: null });
   } else if (model === "folder") {
-    setWorkspaceSearchParams({ request_id: null, folder_id: id });
+    setWorkspaceSearchParams({ request_id: null, folder_id: id, flow_id: null });
   } else {
-    setWorkspaceSearchParams({ request_id: id, folder_id: null });
+    setWorkspaceSearchParams({ request_id: id, folder_id: null, flow_id: null });
   }
 }

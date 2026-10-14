@@ -15,6 +15,7 @@ import {
 import { createFolder } from "../commands/commands";
 import { createSubEnvironmentAndActivate } from "../commands/createEnvironment";
 import { openSettings } from "../commands/openSettings";
+import { openFlows } from "../commands/openFlows";
 import { openWorkspaceSettings } from "../commands/openWorkspaceSettings";
 import { switchWorkspace } from "../commands/switchWorkspace";
 import { useActiveCookieJar } from "../hooks/useActiveCookieJar";
@@ -104,6 +105,11 @@ export function CommandPaletteDialog({ onClose }: { onClose: () => void }) {
         label: "Open Workspace Settings",
         action: "workspace_settings.show",
         onSelect: () => openWorkspaceSettings(),
+      },
+      {
+        key: "flows.open",
+        label: "Open Flows",
+        onSelect: openFlows,
       },
       {
         key: "app.create",

@@ -2,3 +2,4 @@
 // src/lib.rs. `RpcSchema` maps every command name to its (request, response)
 // pair; the app's `rpc()` helper derives its command union from it.
 export * from "./bindings/gen_rpc";
+export * from "./bindings/gen_flows";

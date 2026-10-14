@@ -2,6 +2,7 @@ import { HStack, Icon } from "@yaakapp-internal/ui";
 import classNames from "classnames";
 import { useAtom, useAtomValue } from "jotai";
 import { memo } from "react";
+import { openFlows } from "../commands/openFlows";
 import { activeWorkspaceAtom, activeWorkspaceMetaAtom } from "../hooks/useActiveWorkspace";
 import { useToggleCommandPalette } from "../hooks/useToggleCommandPalette";
 import { workspaceLayoutAtom } from "../lib/atoms";
@@ -86,6 +87,13 @@ export const WorkspaceHeader = memo(function WorkspaceHeader({
           hotkeyAction="command_palette.toggle"
           iconColor="secondary"
           onClick={togglePalette}
+        />
+        <IconButton
+          icon="git_branch"
+          title="Flows"
+          size="sm"
+          iconColor="secondary"
+          onClick={openFlows}
         />
         <SettingsDropdown />
       </div>

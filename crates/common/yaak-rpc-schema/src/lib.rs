@@ -14,6 +14,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use std::path::PathBuf;
 use ts_rs::TS;
+use yaak_flows::{Flow, FlowRunResult};
 use yaak_git::{
     BranchDeleteResult, CloneResult, GitBranchInfo, GitCommit, GitFileDiff, GitRemote,
     GitStatusSummary, GitWorktreeStatus, PullResult, PushResult,
@@ -113,6 +114,16 @@ pub struct CmdRenderTemplateReq {
     pub environment_id: Option<String>,
     pub purpose: Option<RenderPurpose>,
     pub ignore_error: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, TS)]
+#[serde(rename_all = "camelCase")]
+#[ts(export, export_to = "gen_rpc.ts")]
+pub struct CmdRunFlowReq {
+    pub flow: Flow,
+    pub workspace_id: String,
+    /// The whole flow runs under this environment.
+    pub environment_id: Option<String>,
 }
 
 #[derive(Debug, Deserialize, TS)]
@@ -928,6 +939,7 @@ macro_rules! with_commands {
     cmd_metadata(CmdMetadataReq) -> AppMetaData,
     cmd_template_tokens_to_string(CmdTemplateTokensToStringReq) -> String,
     cmd_render_template(CmdRenderTemplateReq) -> String,
+    cmd_run_flow(CmdRunFlowReq) -> FlowRunResult,
     cmd_send_feedback(CmdSendFeedbackReq) -> (),
     cmd_dismiss_notification(CmdDismissNotificationReq) -> (),
     cmd_grpc_reflect(CmdGrpcReflectReq) -> Vec<ServiceDefinition>,

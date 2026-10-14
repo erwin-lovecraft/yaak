@@ -11141,6 +11141,7 @@ dependencies = [
  "yaak-common",
  "yaak-core",
  "yaak-crypto",
+ "yaak-flows",
  "yaak-fonts",
  "yaak-git",
  "yaak-grpc",
@@ -11230,6 +11231,7 @@ dependencies = [
  "yaak",
  "yaak-core",
  "yaak-crypto",
+ "yaak-flows",
  "yaak-models",
  "yaak-plugins",
  "yaak-rpc-schema",
@@ -11284,6 +11286,19 @@ dependencies = [
  "thiserror 2.0.21",
  "ts-rs",
  "uuid",
+]
+
+[[package]]
+name = "yaak-flows"
+version = "0.1.0"
+dependencies = [
+ "log 0.4.34",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.21",
+ "tokio",
+ "ts-rs",
+ "yaak-templates",
 ]
 
 [[package]]
@@ -11541,6 +11556,7 @@ version = "0.0.0"
 dependencies = [
  "serde",
  "ts-rs",
+ "yaak-flows",
  "yaak-git",
  "yaak-grpc",
  "yaak-models",

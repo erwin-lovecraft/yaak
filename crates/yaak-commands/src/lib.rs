@@ -16,6 +16,7 @@ pub mod auth;
 pub mod data;
 pub mod encryption;
 pub mod error;
+pub mod flows;
 pub mod host;
 pub mod models;
 pub mod plugins;

@@ -11,6 +11,9 @@ type WorkspaceSearchSchema = {
   | {
       folder_id: string;
     }
+  | {
+      flow_id: string;
+    }
   // oxlint-disable-next-line no-restricted-types -- Needed to support empty
   | {}
 );
@@ -30,6 +33,10 @@ export const Route = createFileRoute("/workspaces/$workspaceId/")({
     }
     if (folderId) {
       return { ...base, folder_id: folderId };
+    }
+    const flowId = search.flow_id as string | undefined;
+    if (flowId) {
+      return { ...base, flow_id: flowId };
     }
     return base;
   },

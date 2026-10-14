@@ -1,0 +1,17 @@
+[package]
+name = "yaak-flows"
+version = "0.1.0"
+edition = "2024"
+publish = false
+
+[dependencies]
+log = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["time"] }
+ts-rs = { workspace = true }
+yaak-templates = { workspace = true }
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["macros", "rt"] }

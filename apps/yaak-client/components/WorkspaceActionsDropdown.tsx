@@ -3,6 +3,7 @@ import classNames from "classnames";
 import { useAtomValue } from "jotai";
 import { memo, useCallback, useMemo } from "react";
 import { openWorkspaceFromSyncDir } from "../commands/openWorkspaceFromSyncDir";
+import { openFlows } from "../commands/openFlows";
 import { openWorkspaceSettings } from "../commands/openWorkspaceSettings";
 import { switchWorkspace } from "../commands/switchWorkspace";
 import {
@@ -107,6 +108,11 @@ export const WorkspaceActionsDropdown = memo(function WorkspaceActionsDropdown({
         },
       })),
       ...(workspaceActions.length > 0 ? [{ type: "separator" as const }] : []),
+      {
+        label: "Flows",
+        leftSlot: <Icon icon="git_branch" />,
+        onSelect: openFlows,
+      },
       {
         label: "Workspace Settings",
         leftSlot: <Icon icon="settings" />,

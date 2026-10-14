@@ -27,12 +27,16 @@ use tauri::{Manager, Runtime, State, WebviewWindow};
 use tokio::sync::Mutex;
 use yaak_commands::{Host, PluginHost};
 use yaak_core::WorkspaceContext;
+use yaak_commands::flows::FlowHost;
 use yaak_crypto::manager::EncryptionManager;
+use yaak_flows::{FlowRunResult, HttpOutcome};
 use yaak_git::{
     BranchDeleteResult, CloneResult, GitBranchInfo, GitCommit, GitFileDiff, GitRemote,
     GitStatusSummary, GitWorktreeStatus, PullResult, PushResult,
 };
+use yaak::send::{ResponseBody, SendHttpRequestByIdWithPluginsParams, send_http_request_by_id_with_plugins};
 use yaak_grpc::ServiceDefinition;
+use yaak_http::manager::HttpConnectionManager;
 use yaak_grpc::manager::GrpcHandle;
 use yaak_models::blob_manager::BlobManager;
 use yaak_models::models::{
@@ -122,6 +126,76 @@ impl<R: Runtime> ClientCtx<R> {
 /// runs — the Node sidecar. Each is a delegation, which is the point: the
 /// operations are what the handlers need, and this is one host's way of
 /// providing them.
+impl<R: Runtime> FlowHost for ClientCtx<R> {
+    async fn send_flow_request(
+        &self,
+        request_id: &str,
+        environment_id: Option<&str>,
+    ) -> yaak_commands::Result<HttpOutcome> {
+        let app_handle = self.window.app_handle();
+        let plugin_manager = Arc::new(self.pm().await?);
+        let encryption_manager = Arc::new(self.encryption_manager().clone());
+        let connection_manager = app_handle.state::<HttpConnectionManager>();
+        let plugin_context = self.plugin_context();
+        let response_dir = app_handle
+            .path()
+            .app_data_dir()
+            .map_err(|e| yaak_commands::Error::Generic(e.to_string()))?
+            .join("responses");
+
+        let result = send_http_request_by_id_with_plugins(SendHttpRequestByIdWithPluginsParams {
+            query_manager: self.query_manager(),
+            blob_manager: self.blob_manager(),
+            request_id,
+            environment_id,
+            update_source: self.update_source(),
+            cookie_jar_id: self.session().cookie_jar_id,
+            response_dir: &response_dir,
+            emit_events_to: None,
+            emit_response_body_chunks_to: None,
+            plugin_manager,
+            encryption_manager,
+            plugin_context: &plugin_context,
+            cancelled_rx: None,
+            connection_manager: connection_manager.inner(),
+        })
+        .await
+        .map_err(|e| yaak_commands::Error::Generic(e.to_string()))?;
+
+        let response = result.response;
+        if let Some(error) = response.error {
+            return Err(yaak_commands::Error::Generic(error));
+        }
+
+        // The body went to the response's own file unless the engine handed it back.
+        let bytes = match result.response_body {
+            ResponseBody::Returned(bytes) => bytes,
+            ResponseBody::Stored | ResponseBody::Streamed => match &response.body_path {
+                Some(path) => std::fs::read(path)?,
+                None => Vec::new(),
+            },
+        };
+
+        Ok(HttpOutcome {
+            status: u16::try_from(response.status).unwrap_or(0),
+            body: String::from_utf8_lossy(&bytes).into_owned(),
+        })
+    }
+
+    async fn filter_data(
+        &self,
+        filter: &str,
+        content: &str,
+        content_type: &str,
+    ) -> yaak_commands::Result<FilterResponse> {
+        Ok(self
+            .pm()
+            .await?
+            .filter_data(&self.plugin_context(), filter, content, content_type)
+            .await?)
+    }
+}
+
 impl<R: Runtime> PluginHost for ClientCtx<R> {
     async fn loaded_plugin_metadata(&self, directory: &str) -> Option<PluginMetadata> {
         let handle = self.pm().await.ok()?.get_plugin_by_dir(directory).await?;
@@ -403,6 +477,13 @@ async fn cmd_render_template<R: Runtime>(
     req: CmdRenderTemplateReq,
 ) -> Result<String> {
     Ok(yaak_commands::templates::cmd_render_template(ctx, req).await?)
+}
+
+async fn cmd_run_flow<R: Runtime>(
+    ctx: ClientCtx<R>,
+    req: CmdRunFlowReq,
+) -> Result<FlowRunResult> {
+    Ok(yaak_commands::flows::cmd_run_flow(ctx, req).await?)
 }
 
 async fn cmd_send_feedback<R: Runtime>(ctx: ClientCtx<R>, req: CmdSendFeedbackReq) -> Result<()> {

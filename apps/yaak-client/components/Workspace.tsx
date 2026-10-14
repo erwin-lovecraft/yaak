@@ -37,6 +37,9 @@ import { HotkeyList } from "./core/HotkeyList";
 import { CookieDialog } from "./CookieDialog";
 import { FeedbackLink } from "./core/Link";
 import { ErrorBoundary } from "./ErrorBoundary";
+import { FlowEditor } from "./flows/FlowEditor";
+import { FlowsSidebarSection } from "./flows/FlowsSidebarSection";
+import { activeFlowIdAtom, useSubscribeActiveFlowId } from "./flows/flowStore";
 import { FolderLayout } from "./FolderLayout";
 import { GrpcConnectionLayout } from "./GrpcConnectionLayout";
 import { HttpRequestLayout } from "./HttpRequestLayout";
@@ -103,7 +106,7 @@ export function Workspace() {
       className={classNames(
         "x-theme-sidebar",
         "h-full bg-surface border-r border-border-subtle",
-        "grid grid-rows-[auto_1fr]",
+        "grid grid-rows-[auto_minmax(0,1fr)_auto]",
       )}
     >
       <HeaderSize
@@ -120,12 +123,14 @@ export function Workspace() {
       <ErrorBoundary name="Sidebar (Floating)">
         <Sidebar />
       </ErrorBoundary>
+      <FlowsSidebarSection />
     </div>
   ) : (
-    <div className="x-theme-sidebar overflow-hidden bg-surface h-full">
+    <div className="x-theme-sidebar overflow-hidden bg-surface h-full grid grid-rows-[minmax(0,1fr)_auto] border-r border-border-subtle">
       <ErrorBoundary name="Sidebar">
-        <Sidebar className="border-r border-border-subtle" />
+        <Sidebar />
       </ErrorBoundary>
+      <FlowsSidebarSection />
     </div>
   );
 
@@ -152,6 +157,7 @@ function WorkspaceBody() {
   const activeRequest = useAtomValue(activeRequestAtom);
   const activeFolder = useAtomValue(activeFolderAtom);
   const activeWorkspace = useAtomValue(activeWorkspaceAtom);
+  const activeFlowId = useAtomValue(activeFlowIdAtom);
 
   if (activeWorkspace == null) {
     return (
@@ -170,6 +176,13 @@ function WorkspaceBody() {
     );
   }
 
+  if (activeFlowId != null) {
+    return (
+      <div style={body} className="h-full min-h-0">
+        <FlowEditor />
+      </div>
+    );
+  }
   if (activeRequest?.model === "grpc_request") {
     return <GrpcConnectionLayout style={body} />;
   }
@@ -207,6 +220,7 @@ function useGlobalWorkspaceHooks() {
 
   useSubscribeActiveRequestId();
   useSubscribeActiveFolderId();
+  useSubscribeActiveFlowId();
   useSubscribeActiveEnvironmentId();
   useSubscribeActiveCookieJarId();
 

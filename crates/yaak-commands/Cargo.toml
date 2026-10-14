@@ -11,6 +11,7 @@ thiserror = { workspace = true }
 yaak = { workspace = true }
 yaak-core = { workspace = true }
 yaak-crypto = { workspace = true }
+yaak-flows = { workspace = true }
 yaak-models = { workspace = true }
 yaak-plugins = { workspace = true }
 yaak-rpc-schema = { workspace = true }
